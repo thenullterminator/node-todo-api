@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/thenullterminator/node-todo-api/issues"
   },
-  "homepage": "https://github.com/thenullterminator/node-todo-api#readme"
+  "homepage": "https://github.com/thenullterminator/node-todo-api#readme",
+  "dependencies": {
+    "mongodb": "^3.2.6"
+  }
 }
