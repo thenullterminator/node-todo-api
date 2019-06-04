@@ -1,33 +1,26 @@
-var mongoose=require("mongoose");
+const {mongoose}=require('./database/mongooseconfig');
+const {ToDoModel}=require('./models/todo');
+const {UserModel}=require('./models/user');
 
-mongoose.Promise=global.Promise;
-mongoose.connect('mongodb://localhost:27017/To_Do_App',{ useNewUrlParser: true });
+const express=require('express');
+const bodyparser=require('body-parser');
+const port=process.env.PORT||3001;
 
-var todo=mongoose.model('to_do_prototype',{
+var app=express();
 
-    text:{
-        type:String
-    },
-    completed:{
-        type:Boolean
-    },
-    completedAt:{
-        type:Number
-    }
+app.use(bodyparser.json());
+
+app.post('/createtodos',(req,res)=>{
+
+    var newtodo=new ToDoModel(req.body);
+    
+    newtodo.save().then((doc)=>{
+        res.status(201).send(doc);
+    },(error)=>{
+        res.status(400).send(error);
+    })
 });
 
-
-var newtodo= new todo({
-    text:'Cooking Dinner',
-    completed:true,
-    completedAt:1900
+app.listen(port,()=>{
+console.log(`Server is up on port ${port}`);
 });
-
-newtodo.save().then((doc)=>{
-    console.log(doc);
-},(e)=>{
-    console.log('some error occurred');
-});
-
-
-// mongoose.disconnect();
