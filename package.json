@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/thenullterminator/node-todo-api#readme",
   "dependencies": {
-    "mongodb": "^3.2.6"
+    "mongodb": "^3.2.6",
+    "mongoose": "^5.5.12"
   }
 }
