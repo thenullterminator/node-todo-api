@@ -25,7 +25,7 @@ app.post('/todos',(req,res)=>{
         res.status(201).send(doc);
     },(error)=>{
         res.status(400).send(error);
-    })
+    });
 });
 
 // get route to list all existing todos
@@ -44,3 +44,7 @@ ToDoModel.find().then((docs)=>{
 app.listen(port,()=>{
 console.log(`Server is up on port ${port}`);
 });
+
+
+// eporting our app.
+module.exports={app};
