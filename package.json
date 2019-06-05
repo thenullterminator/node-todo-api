@@ -21,5 +21,11 @@
     "express": "^4.17.1",
     "mongodb": "^3.2.6",
     "mongoose": "^5.5.12"
+  },
+  "devDependencies": {
+    "expect": "^1.20.2",
+    "mocha": "^6.1.4",
+    "nodemon": "^1.19.1",
+    "supertest": "^4.0.2"
   }
 }

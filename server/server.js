@@ -4,13 +4,13 @@ const {UserModel}=require('./models/user');
 
 const express=require('express');
 const bodyparser=require('body-parser');
-const port=process.env.PORT||3001;
+const port=process.env.PORT||3000;
 
 var app=express();
 
 app.use(bodyparser.json());
 
-app.post('/createtodos',(req,res)=>{
+app.post('/todos',(req,res)=>{
 
     var newtodo=new ToDoModel(req.body);
     
@@ -20,6 +20,17 @@ app.post('/createtodos',(req,res)=>{
         res.status(400).send(error);
     })
 });
+
+app.get('/todos',(req,res)=>{
+
+ToDoModel.find().then((docs)=>{
+    res.send({docs});
+},(e)=>{
+    res.status(401).send(e);
+})
+
+});
+
 
 app.listen(port,()=>{
 console.log(`Server is up on port ${port}`);
