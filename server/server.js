@@ -5,6 +5,7 @@ const {ToDoModel}=require('./models/todo');
 const {UserModel}=require('./models/user');
 
 // Third party imports 
+const {ObjectID}=require('mongodb');
 const express=require('express');
 const bodyparser=require('body-parser');
 // Setting up the port
@@ -39,6 +40,24 @@ ToDoModel.find().then((docs)=>{
 });
 
 
+// get route to fetch todo corresponding to a particular id
+app.get('/todos/:id',(req,res)=>{
+
+    if(!ObjectID.isValid(req.params.id))
+    {
+        return  res.status(400).send({});
+    }
+    
+
+    ToDoModel.findById(req.params.id).then((todo)=>{
+        if(!todo)
+        {
+            return res.status(404).send({});
+        }
+        res.status(200).send(todo);
+    }).catch((e)=>res.status(400).send(e))
+    
+});
 
 // setting up listener
 app.listen(port,()=>{
