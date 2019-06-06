@@ -85,3 +85,44 @@ describe('GET /todos(List)',()=>{
             .end(done);
     });
 });
+
+
+describe('GET /todos/:id',()=>{
+
+    it('should not run since id is invalid',(done)=>{
+
+        request(app)
+            .get('/todos/14234')
+            .expect(400)
+            .end(done);
+    });
+
+    it('should not have any item of this particular valid id',(done)=>{
+
+
+        request(app)
+            .get('/todos/5cf8ace6e2861b7a327db0ba')
+            .expect(404)
+            .end(done);
+
+    });
+
+    it('should return the appropriate todo corresponding to the given id',(done)=>{
+         
+        var id='';
+        ToDoModel.findOne({text:'todo 3'}).then((todo)=>{
+            if(todo)
+            {
+                request(app)
+                .get(`/todos/${todo.id}`)
+                .expect(200)
+                .expect((res)=>{
+                        expect(res.body.text).toBe('todo 3');
+                })
+                .end(done);
+            }
+        },(error)=>{});
+
+    });
+
+});
