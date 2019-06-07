@@ -85,6 +85,7 @@ app.patch('/todos/:id',(req,res)=>{
 
     var body=_.pick(req.body,['text','completed']);//will pick those properties only if they existed
 
+    
     if(!ObjectID.isValid(req.params.id))
     {
         return res.status(400).send();

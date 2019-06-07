@@ -7,7 +7,7 @@ const request=require('supertest');
 const {ObjectID}=require('mongodb');
 
 
-var testdata=[{text:'todo 1',_id: new ObjectID},{text:'todo 2',_id: new ObjectID},{text:'todo 3',_id: new ObjectID}];
+var testdata=[{text:'todo 1',_id: new ObjectID},{text:'todo 2',_id: new ObjectID},{completed:true,completedAt:42323,text:'todo 3',_id: new ObjectID}];
 
 beforeEach((done)=>{
     ToDoModel.deleteMany({}).then((result)=>{
@@ -176,5 +176,73 @@ describe('DELETE /todos/:id',()=>{
             .expect(404)
             .end(done);
 
+    });
+});
+
+
+
+describe('PATCH /todos/:id',(req,res)=>{
+
+    it('should update the todo',(done)=>{
+        
+        request(app)
+            .patch(`/todos/${testdata[0]._id.toHexString()}`)
+            .send({text:"todo 1 completed",completed:true})
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.text).toBe('todo 1 completed');
+                expect(res.body.completed).toBe(true);
+                expect(res.body.completedAt).toNotBe(null);
+                expect(res.body._id).toBe(testdata[0]._id.toHexString());
+            })
+            .end((err,res)=>{
+                
+                if(err)
+                {
+                    return done(err);
+                }
+
+                ToDoModel.findById(testdata[0]._id.toHexString()).then((todo)=>{
+                    
+                    expect(todo).toExist();
+                    expect(todo.text).toBe('todo 1 completed');
+                    expect(todo.completed).toBe(true);
+                    expect(todo.completedAt).toNotBe(null);
+                    expect(todo._id).toEqual(testdata[0]._id);
+                    done();
+                }).catch((e)=>done(e));
+
+            });
+    });
+
+    it('should clear completedAt when todo is not completed',(done)=>{
+
+        request(app)
+        .patch(`/todos/${testdata[2]._id.toHexString()}`)
+        .send({text:'todo 3 is not completed',completed:false})
+        .expect(200)
+        .expect((res)=>{
+            expect(res.body.text).toBe('todo 3 is not completed');
+            expect(res.body.completed).toBe(false);
+            expect(res.body.completedAt).toBe(null);
+            expect(res.body._id).toBe(testdata[2]._id.toHexString());
+        })
+        .end((err,res)=>{
+            
+            if(err)
+            {
+                return done(err);
+            }
+
+            ToDoModel.findById(testdata[2]._id.toHexString()).then((todo)=>{
+                
+                expect(todo).toExist();
+                expect(todo.text).toBe('todo 3 is not completed');
+                expect(todo.completed).toBe(false);
+                expect(todo.completedAt).toBe(null);
+                expect(todo._id).toEqual(testdata[2]._id);
+                done();
+            }).catch((e)=>done(e));
+        });
     });
 });
