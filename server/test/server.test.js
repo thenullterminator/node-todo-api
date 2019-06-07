@@ -4,8 +4,10 @@ const {ToDoModel}=require('../models/todo');
 // third party imports
 const expect=require('expect');
 const request=require('supertest');
+const {ObjectID}=require('mongodb');
 
-var testdata=[{text:'todo 1'},{text:'todo 2'},{text:'todo 3'}];
+
+var testdata=[{text:'todo 1',_id: new ObjectID},{text:'todo 2',_id: new ObjectID},{text:'todo 3',_id: new ObjectID}];
 
 beforeEach((done)=>{
     ToDoModel.deleteMany({}).then((result)=>{
@@ -123,5 +125,58 @@ describe('GET /todos/:id',()=>{
             }
 
         },(error)=>{});
+    });
+});
+
+
+
+
+describe('DELETE /todos/:id',()=>{
+
+    it('should remove a todo',(done)=>{
+
+        var testid=testdata[1]._id.toHexString();
+
+        request(app)
+            .delete(`/todos/${testid}`)
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.text).toBe(testid);
+            })
+            .end((err,res)=>{
+
+                if(err)
+                {
+                    return done(err);
+                }
+
+                ToDoModel.findById(testid).then((todo)=>{
+                    expect(todo).toNotExist();
+                    done();
+                }).catch((e)=>done(e));
+            });
+
+
+    });
+
+
+    it('should not run since id is invalid',(done)=>{
+
+        request(app)
+            .delete('/todos/14234')
+            .expect(400)
+            .end(done);
+    });
+
+
+
+    it('should not have any item of this particular valid id',(done)=>{
+
+
+        request(app)
+            .delete('/todos/5cf8ace6e2861b7a327db0ba')
+            .expect(404)
+            .end(done);
+
     });
 });
