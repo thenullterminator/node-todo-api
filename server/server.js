@@ -1,3 +1,4 @@
+require('./env_config/config');
 // local user defined imports
 const {mongoose}=require('./database/mongooseconfig');//connected to mongoDB
 // Our mongoose models
@@ -10,7 +11,7 @@ const {ObjectID}=require('mongodb');
 const express=require('express');
 const bodyparser=require('body-parser');
 // Setting up the port
-const port=process.env.PORT||3000;
+const port=process.env.PORT;
 
 // creating a brand new app
 var app=express();
@@ -85,7 +86,7 @@ app.patch('/todos/:id',(req,res)=>{
 
     var body=_.pick(req.body,['text','completed']);//will pick those properties only if they existed
 
-    
+
     if(!ObjectID.isValid(req.params.id))
     {
         return res.status(400).send();
