@@ -5,6 +5,7 @@ const {ToDoModel}=require('./models/todo');
 const {UserModel}=require('./models/user');
 
 // Third party imports 
+const _=require('lodash');
 const {ObjectID}=require('mongodb');
 const express=require('express');
 const bodyparser=require('body-parser');
@@ -78,6 +79,37 @@ app.delete('/todos/:id',(req,res)=>{
 });
 
 
+// update route to update a todo by id
+
+app.patch('/todos/:id',(req,res)=>{
+
+    var body=_.pick(req.body,['text','completed']);//will pick those properties only if they existed
+
+    if(!ObjectID.isValid(req.params.id))
+    {
+        return res.status(400).send();
+    }
+
+    if(_.isBoolean(body.completed)&&body.completed){
+        body.completedAt=new Date().getTime();
+    }
+    else
+    {
+        body.completed=false;
+        body.completedAt=null;
+    }
+
+    ToDoModel.findByIdAndUpdate(req.params.id,{$set:body},{new:true}).then((todo)=>{
+        if(!todo)
+        {
+            return res.status(404).send();
+        }
+
+        res.status(200).send(todo);
+    }).catch((e)=>res.status(400).send(e)); 
+
+
+});
 
 
 

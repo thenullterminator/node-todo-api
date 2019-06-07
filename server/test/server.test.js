@@ -141,7 +141,7 @@ describe('DELETE /todos/:id',()=>{
             .delete(`/todos/${testid}`)
             .expect(200)
             .expect((res)=>{
-                expect(res.body.text).toBe(testid);
+                expect(res.body._id).toBe(testid);
             })
             .end((err,res)=>{
 
@@ -159,7 +159,6 @@ describe('DELETE /todos/:id',()=>{
 
     });
 
-
     it('should not run since id is invalid',(done)=>{
 
         request(app)
@@ -167,7 +166,6 @@ describe('DELETE /todos/:id',()=>{
             .expect(400)
             .end(done);
     });
-
 
 
     it('should not have any item of this particular valid id',(done)=>{
