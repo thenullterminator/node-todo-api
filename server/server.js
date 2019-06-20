@@ -31,7 +31,6 @@ app.post('/todos',(req,res)=>{
     });
 });
 
-
 // post route for new user account
 app.post('/users',(req,res)=>{
 
@@ -39,9 +38,11 @@ app.post('/users',(req,res)=>{
     var newuser=new UserModel(body);
 
     newuser.save().then((doc)=>{
-        res.status(201).send(doc);
-    },(error)=>{
-        res.status(400).send(error);
+        return newuser.generateAuthToken();
+    }).then((token)=>{
+        res.header('x-auth',token).send(newuser);
+    }).catch((e)=>{
+        res.status(400).send(e);
     });
 });
 
