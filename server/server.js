@@ -1,5 +1,6 @@
 require('./env_config/config');
 // local user defined imports
+const {authenticate}=require('./middleware/authenticate');
 const {mongoose}=require('./database/mongooseconfig');//connected to mongoDB
 // Our mongoose models
 const {ToDoModel}=require('./models/todo');
@@ -40,10 +41,12 @@ app.post('/users',(req,res)=>{
     newuser.save().then((doc)=>{
         return newuser.generateAuthToken();
     }).then((token)=>{
+        // setting header and sending only required info back using overrid toJSON function
         res.header('x-auth',token).send(newuser);
     }).catch((e)=>{
         res.status(400).send(e);
     });
+
 });
 
 // get route to list all existing todos
@@ -56,6 +59,12 @@ ToDoModel.find().then((docs)=>{
 })
 });
 
+
+
+//get route for me page
+app.get('/users/me',authenticate,(req,res)=>{
+    res.send(req.user);
+});
 
 // get route to fetch todo corresponding to a particular id
 app.get('/todos/:id',(req,res)=>{
