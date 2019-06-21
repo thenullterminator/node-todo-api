@@ -86,7 +86,7 @@ userschema.statics.findByCredentials=function(email,password){
                     resolve(user);
                 }
                 else{
-                    reject;
+                    reject();
                 }
             });
         });

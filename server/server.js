@@ -58,11 +58,11 @@ ToDoModel.find().then((docs)=>{
 })  
 });
 
-// get route for login 
+// post route for login 
 app.post('/users/login',(req,res)=>{
-
-    var body=_.pick(req.body,['email','password']);
     
+    var body=_.pick(req.body,['email','password']);
+
     UserModel.findByCredentials(body.email,body.password).then((user)=>{
         return user.generateAuthToken().then((token)=>{
             res.header('x-auth',token).send(user);
@@ -70,7 +70,6 @@ app.post('/users/login',(req,res)=>{
     }).catch((e)=>{
         res.status(400).send();
     });
-
 });
 
 //get route for me page
