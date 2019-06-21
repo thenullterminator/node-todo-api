@@ -174,7 +174,7 @@ describe('DELETE /todos/:id',()=>{
 
 
 
-describe('PATCH /todos/:id',(req,res)=>{
+describe('PATCH /todos/:id',()=>{
 
     it('should update the todo',(done)=>{
         
@@ -238,4 +238,83 @@ describe('PATCH /todos/:id',(req,res)=>{
             }).catch((e)=>done(e));
         });
     });
+});
+
+
+describe('GET /users/me',()=>{
+
+    it('should return user if authenticated',(done)=>{
+        request(app)
+            .get('/users/me')
+            .set('x-auth',userdata[0].tokens[0].token)
+            .expect(200)
+            .expect((res)=>{
+                expect(res.body.email).toBe(userdata[0].email);
+                expect(res.body._id).toBe(userdata[0]._id.toHexString());
+            })
+            .end(done);
+    });
+
+
+    it('should not return user if not authenticated',(done)=>{
+
+        request(app)
+            .get('/users/me')
+            .expect(401)
+            .expect((res)=>{
+                expect(res.body).toEqual({})
+            })
+            .end(done);
+    });
+
+});
+
+
+describe('POST /users',()=>{
+
+    it('should create a user',(done)=>{
+        
+        request(app)
+            .post('/users')
+            .send({email:"pqr@pqr.pqr",password:"1234567"})
+            .expect(201)
+            .expect((res)=>{
+                expect(res.body.email).toBe('pqr@pqr.pqr');
+                expect(res.body._id).toExist();
+                expect(res.headers['x-auth']).toExist();
+            })
+            .end((err)=>{
+                if(err){
+                    return done(err);
+                }
+
+                UserModel.findOne({email:"pqr@pqr.pqr"}).then((user)=>{
+                    expect(user).toExist();
+                    expect(user.password).toNotBe("1234567");
+                    done();
+                }).catch((e)=>done(e));
+            });
+
+    });
+
+
+    it('should not create user if email already in use',(done)=>{
+
+        request(app)
+            .post('/users')
+            .send({email:"abc@abc.abc",password:"1234567"})
+            .expect(400)
+            .end(done);
+    });
+
+    it('should not create user if there are validation errors',(done)=>{
+
+        request(app)
+            .post('/users')
+            .send({email:"abcd@abc.abc",password:"12345"})
+            .expect(400)
+            .end(done);
+    });
+
+
 });

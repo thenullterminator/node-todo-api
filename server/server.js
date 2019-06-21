@@ -37,16 +37,14 @@ app.post('/users',(req,res)=>{
 
     var body=_.pick(req.body,['email','password']);
     var newuser=new UserModel(body);
-
     newuser.save().then((doc)=>{
         return newuser.generateAuthToken();
     }).then((token)=>{
         // setting header and sending only required info back using overrid toJSON function
-        res.header('x-auth',token).send(newuser);
+        res.header('x-auth',token).status(201).send(newuser);
     }).catch((e)=>{
         res.status(400).send(e);
     });
-
 });
 
 // get route to list all existing todos
