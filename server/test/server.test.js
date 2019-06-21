@@ -1,22 +1,15 @@
 // user defined imports
 const {app}=require('../server');
 const {ToDoModel}=require('../models/todo');
+const {UserModel}=require('../models/user');
+const {testdata,populatetodos,userdata,populateusers}=require('./seed');
 // third party imports
 const expect=require('expect');
 const request=require('supertest');
 const {ObjectID}=require('mongodb');
 
-
-var testdata=[{text:'todo 1',_id: new ObjectID},{text:'todo 2',_id: new ObjectID},{completed:true,completedAt:42323,text:'todo 3',_id: new ObjectID}];
-
-beforeEach((done)=>{
-    ToDoModel.deleteMany({}).then((result)=>{
-        ToDoModel.insertMany(testdata);
-        done();
-    });
-});
-
-
+beforeEach(populateusers);
+beforeEach(populatetodos);
 
 describe('POST /todos(Creation)',()=>{
 
