@@ -11,6 +11,7 @@ const _=require('lodash');
 const {ObjectID}=require('mongodb');
 const express=require('express');
 const bodyparser=require('body-parser');
+const bcrypt=require("bcryptjs");
 // Setting up the port
 const port=process.env.PORT;
 
@@ -57,7 +58,20 @@ ToDoModel.find().then((docs)=>{
 })  
 });
 
+// get route for login 
+app.post('/users/login',(req,res)=>{
 
+    var body=_.pick(req.body,['email','password']);
+    
+    UserModel.findByCredentials(body.email,body.password).then((user)=>{
+        return user.generateAuthToken().then((token)=>{
+            res.header('x-auth',token).send(user);
+        });
+    }).catch((e)=>{
+        res.status(400).send();
+    });
+
+});
 
 //get route for me page
 app.get('/users/me',authenticate,(req,res)=>{
