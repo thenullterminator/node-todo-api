@@ -8,10 +8,10 @@ var userschema= new mongoose.Schema({
 
     email:{
         type:String,
+        unique:true,
         required:true,
         minlength:1,
         trim:true,
-        unique:true,
         validate:{
             validator:validator.isEmail,  // checkout syntax for validation on mongoose validators.
             message:'{VALUE} is not a valid email'

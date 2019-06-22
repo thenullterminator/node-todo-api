@@ -20,7 +20,7 @@ describe('POST /todos(Creation)',()=>{
         request(app)          //
             .post('/todos')    // Making a request and sending data to server
             .send({text})     //
-
+            .set('x-auth',userdata[0].tokens[0].token)
             .expect(201)                            // expectations from the reponse 
             .expect((res)=>{                        // client recieves form server
                 expect(res.body.text).toBe(text);
@@ -47,6 +47,7 @@ describe('POST /todos(Creation)',()=>{
 
         request(app)
             .post('/todos')
+            .set('x-auth',userdata[0].tokens[0].token)
             .send({})
             .expect(400)
             .end((err,res)=>{
@@ -73,9 +74,10 @@ describe('GET /todos(List)',()=>{
 
         request(app)
             .get('/todos')
+            .set('x-auth',userdata[0].tokens[0].token)
             .expect(200)
             .expect((res)=>{
-                expect(res.body.docs.length).toBe(3);
+                expect(res.body.docs.length).toBe(1);
             })
             .end(done);
     });
@@ -84,10 +86,27 @@ describe('GET /todos(List)',()=>{
 
 describe('GET /todos/:id',()=>{
 
+    it('should not return todo created by some other user',(done)=>{
+
+        var id='';
+        ToDoModel.findOne({text:'todo 2'}).then((todo)=>{
+            if(todo)
+            {
+                request(app)
+                .get(`/todos/${todo.id}`)
+                .set('x-auth',userdata[0].tokens[0].token)
+                .expect(404)
+                .end(done);
+            }
+
+        },(error)=>{});
+
+    });
     it('should not run since id is invalid',(done)=>{
 
         request(app)
             .get('/todos/14234')
+            .set('x-auth',userdata[0].tokens[0].token)
             .expect(400)
             .end(done);
     });
@@ -97,6 +116,7 @@ describe('GET /todos/:id',()=>{
 
         request(app)
             .get('/todos/5cf8ace6e2861b7a327db0ba')
+            .set('x-auth',userdata[0].tokens[0].token)
             .expect(404)
             .end(done);
 
@@ -105,14 +125,15 @@ describe('GET /todos/:id',()=>{
     it('should return the appropriate todo corresponding to the given id',(done)=>{
          
         var id='';
-        ToDoModel.findOne({text:'todo 3'}).then((todo)=>{
+        ToDoModel.findOne({text:'todo 1'}).then((todo)=>{
             if(todo)
             {
                 request(app)
                 .get(`/todos/${todo.id}`)
+                .set('x-auth',userdata[0].tokens[0].token)
                 .expect(200)
                 .expect((res)=>{
-                        expect(res.body.text).toBe('todo 3');
+                        expect(res.body.text).toBe('todo 1');
                 })
                 .end(done);
             }
@@ -132,6 +153,7 @@ describe('DELETE /todos/:id',()=>{
 
         request(app)
             .delete(`/todos/${testid}`)
+            .set('x-auth',userdata[1].tokens[0].token)
             .expect(200)
             .expect((res)=>{
                 expect(res.body._id).toBe(testid);
@@ -152,10 +174,35 @@ describe('DELETE /todos/:id',()=>{
 
     });
 
+    it('should not remove a todo of other user',(done)=>{
+
+        var testid=testdata[0]._id.toHexString();
+
+        request(app)
+            .delete(`/todos/${testid}`)
+            .set('x-auth',userdata[1].tokens[0].token)
+            .expect(404)
+            .end((err,res)=>{
+
+                if(err)
+                {
+                    return done(err);
+                }
+
+                ToDoModel.findById(testid).then((todo)=>{
+                    expect(todo).toExist();
+                    done();
+                }).catch((e)=>done(e));
+            });
+
+
+    });
+
     it('should not run since id is invalid',(done)=>{
 
         request(app)
             .delete('/todos/14234')
+            .set('x-auth',userdata[1].tokens[0].token)
             .expect(400)
             .end(done);
     });
@@ -166,6 +213,7 @@ describe('DELETE /todos/:id',()=>{
 
         request(app)
             .delete('/todos/5cf8ace6e2861b7a327db0ba')
+            .set('x-auth',userdata[1].tokens[0].token)
             .expect(404)
             .end(done);
 
@@ -176,10 +224,21 @@ describe('DELETE /todos/:id',()=>{
 
 describe('PATCH /todos/:id',()=>{
 
+    it('should not update todo of other user',(done)=>{
+        request(app)
+        .patch(`/todos/${testdata[1]._id.toHexString()}`)
+        .set('x-auth',userdata[0].tokens[0].token)
+        .send({text:"todo 1 completed",completed:true})
+        .expect(404)
+        .end(done);
+
+    });
+
     it('should update the todo',(done)=>{
         
         request(app)
             .patch(`/todos/${testdata[0]._id.toHexString()}`)
+            .set('x-auth',userdata[0].tokens[0].token)
             .send({text:"todo 1 completed",completed:true})
             .expect(200)
             .expect((res)=>{
@@ -212,6 +271,7 @@ describe('PATCH /todos/:id',()=>{
 
         request(app)
         .patch(`/todos/${testdata[2]._id.toHexString()}`)
+        .set('x-auth',userdata[1].tokens[0].token)
         .send({text:'todo 3 is not completed',completed:false})
         .expect(200)
         .expect((res)=>{
@@ -341,7 +401,7 @@ describe('POST /users/login',()=>{
                 }
 
                 UserModel.findById(userdata[1]._id).then((user)=>{
-                    expect(user.tokens[0]).toInclude({
+                    expect(user.tokens[1]).toInclude({
                         access:'auth',
                         token:res.headers['x-auth']
                     });
@@ -368,7 +428,7 @@ describe('POST /users/login',()=>{
                 }
 
                 UserModel.findById(userdata[1]._id).then((user)=>{
-                    expect(user.tokens.length).toBe(0);
+                    expect(user.tokens.length).toBe(1);
                     done();
                 }).catch((e)=>done(e));
             });

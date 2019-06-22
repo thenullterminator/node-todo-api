@@ -2,7 +2,8 @@ const {ObjectID}=require('mongodb');
 const {ToDoModel}=require('../models/todo');
 const {UserModel}=require('../models/user');
 const jwt=require('jsonwebtoken');
-var testdata=[{text:'todo 1',_id: new ObjectID},{text:'todo 2',_id: new ObjectID},{completed:true,completedAt:42323,text:'todo 3',_id: new ObjectID}];
+var id1=new ObjectID(),id2=new ObjectID();
+var testdata=[{text:'todo 1',_id: new ObjectID,_creator:id1},{text:'todo 2',_id: new ObjectID,_creator:id2},{completed:true,completedAt:42323,text:'todo 3',_id: new ObjectID,_creator:id2}];
 
 const populatetodos=(done)=>{
     ToDoModel.deleteMany({}).then((result)=>{
@@ -11,7 +12,7 @@ const populatetodos=(done)=>{
     });
 };
 
-var id1=new ObjectID(),id2=new ObjectID();
+
 
 const userdata=[{
     _id:id1,
@@ -25,6 +26,10 @@ const userdata=[{
     _id:id2,
     email:'asd@asd.asd',
     password:'password2',
+    tokens:[{
+        access:'auth',
+        token:jwt.sign({_id:id2,access:'auth'},'123abc').toString()
+    }]
 }];
 
 const populateusers=(done)=>{

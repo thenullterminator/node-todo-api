@@ -15,7 +15,12 @@ var todo=mongoose.model('To_Do_Models',{
     completedAt:{
         type:Number,
         default:null
+    },
+    _creator:{
+        required:true,
+        type:mongoose.Schema.Types.ObjectId
     }
+
 });
 
 
