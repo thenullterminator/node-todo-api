@@ -52,6 +52,16 @@ userschema.methods.toJSON=function(){//overriding default toJSON so that only re
     return _.pick(userobject,['_id','email']);
 }
 
+userschema.methods.removeToken=function(token){
+
+    var user=this;
+    return user.update({
+        $pull:{
+            tokens:{token}
+        }
+    });
+
+};
 userschema.statics.findByToken=function(token){
 
     var User=this;//this binding with the model name......
